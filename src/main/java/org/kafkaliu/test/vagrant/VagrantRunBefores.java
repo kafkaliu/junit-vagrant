@@ -21,6 +21,8 @@ public class VagrantRunBefores extends Statement {
 	
 	private VagrantCli cli;
 	
+	private VagrantMachine vagrantMachine;
+	
 	private Class<?> klass;
 	
 	private String guestpath = "/vagrant-junit";
@@ -31,6 +33,7 @@ public class VagrantRunBefores extends Statement {
 		this.vagrantEnv = vagrantEnv;
 		this.klass = klass;
 		this.cli = new VagrantCli(vagrantEnv);
+		this.vagrantMachine = new VagrantMachine(vagrantEnv);
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class VagrantRunBefores extends Statement {
 	}
 
 	private void syncedClasspaths() {
-		for (RubyObject machine : new VagrantMachine(vagrantEnv).getMachines()) {
+		for (RubyObject machine : vagrantMachine.getMachines()) {
 			RubyObject config = (RubyObject) machine.getInstanceVariable("@config");
 			RubyObject vm = (RubyObject) config.callMethod("vm");
 			syncedClasspath(vm);

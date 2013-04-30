@@ -1,8 +1,11 @@
 package org.kafkaliu.test.vagrant.ruby;
 
-import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.*;
+import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
+import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsSymbol;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jruby.RubyObject;
 import org.jruby.embed.LocalContextScope;
@@ -23,9 +26,11 @@ public class VagrantEnvironment {
 		}
 		scriptingContainer = new ScriptingContainer(
 				LocalContextScope.SINGLETHREAD);
+		Map<String, String> params = new HashMap<String, String>(scriptingContainer.getEnvironment());
 		if (vagrantLog != null && !vagrantLog.isEmpty()) {
-			scriptingContainer.getEnvironment().put("VAGRANT_LOG", vagrantLog);
+			params.put("VAGRANT_LOG", vagrantLog);
 		}
+		scriptingContainer.setEnvironment(params);
 		env = (RubyObject) scriptingContainer
 				.runScriptlet("require 'vagrant'\n" + "\n"
 						+ "return Vagrant::Environment.new(:cwd => '"

@@ -1,6 +1,7 @@
 package org.kafkaliu.test.vagrant.ruby;
 
-import org.jruby.RubyArray;
+import java.util.List;
+
 import org.jruby.RubyObject;
 import org.jruby.RubySymbol;
 public class VagrantMachine {
@@ -13,7 +14,7 @@ public class VagrantMachine {
 	}
 	
 	public RubyObject[] getMachines() {
-		RubyArray machineNames = (RubyArray) vagrantEnv.callCli("machine_names");
+		List<?> machineNames = getMachineNames();
 		RubyObject[] machines = new RubyObject[machineNames.size()];
 		for (int i = 0; i < machineNames.size(); i++) {
 			RubySymbol machineName = (RubySymbol) machineNames.get(i);
@@ -24,6 +25,11 @@ public class VagrantMachine {
 	
 	public RubyObject getMachine(String vmName) {
 		return method("machine", vmName, "virtualbox");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<RubySymbol> getMachineNames() {
+		return (List<RubySymbol>) vagrantEnv.callCli("machine_names");
 	}
 	
 	private RubyObject method(String name, String... args) {
