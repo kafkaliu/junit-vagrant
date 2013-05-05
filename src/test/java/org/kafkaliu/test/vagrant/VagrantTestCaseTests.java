@@ -3,7 +3,6 @@ package org.kafkaliu.test.vagrant;
 import static org.junit.Assert.assertEquals;
 
 import java.net.URL;
-import java.text.MessageFormat;
 
 import org.eclipse.jetty.client.HttpExchange;
 import org.junit.Test;
@@ -21,7 +20,7 @@ public class VagrantTestCaseTests extends VagrantTestCase {
 
 	@Test
 	public void testServersInVM() throws Exception {
-		assertEquals(HttpExchange.STATUS_COMPLETED, request(new URL("http://192.168.56.100:8080")));
+		assertEquals(HttpExchange.STATUS_COMPLETED, request(new URL("http://192.168.56.100:8080"))[0]);
 	}
 
 	@Test

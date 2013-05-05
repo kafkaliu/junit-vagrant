@@ -5,8 +5,8 @@ import static org.kafkaliu.test.vagrant.VagrantUtils.getVagrantfilePath;
 
 import java.net.URL;
 
+import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.HttpExchange;
 import org.jruby.RubyObject;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.InitializationError;
@@ -37,14 +37,17 @@ public class VagrantTestCase {
 		return ((RubyObject) vagrantMachine.getMachine(vmName).callMethod("state")).getInstanceVariable("@short_description").asJavaString();
 	}
 	
-	protected int request(URL url) throws Exception {
-		HttpExchange exchange = new HttpExchange();
+	protected Object[] request(URL url) throws Exception {
+		ContentExchange exchange = new ContentExchange();
 		exchange.setURL(url.getProtocol() + "://" + url.getHost() + ":" + url.getPort());
 
 		HttpClient client = new HttpClient();
 		client.start();
 		client.send(exchange);
-
-		return exchange.waitForDone();
+		
+		Object[] result = new Object[2];
+		result[0] = exchange.waitForDone();
+		result[1] = exchange.getResponseContent();
+		return result;
 	}
 }
