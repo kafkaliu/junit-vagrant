@@ -1,7 +1,5 @@
 package org.kafkaliu.test.vagrant.ruby;
 
-import java.io.IOException;
-
 import org.jruby.RubySymbol;
 import org.jruby.runtime.builtin.IRubyObject;
 
@@ -16,27 +14,27 @@ public class VagrantCli {
 		this.vagrantMachine = new VagrantMachine(env);
 	}
 
-	public void up() throws IOException {
+	public void up() {
 		cli("up");
 	}
 
-	public void destroy() throws IOException {
+	public void destroy() {
 		cli("destroy", "-f");
 	}
 
-	public void halt() throws IOException {
+	public void halt() {
 		cli("halt");
 	}
 
-	public void halt(String vmName) throws IOException {
+	public void halt(String vmName) {
 		cli("halt", vmName);
 	}
 
-	public void suspend() throws IOException {
+	public void suspend() {
 		cli("suspend");
 	}
 
-	public void resume() throws IOException {
+	public void resume() {
 		cli("resume");
 	}
 	
@@ -45,7 +43,7 @@ public class VagrantCli {
 			cli("ssh", vmName.asJavaString(), "-c", command);
 		}
 	}
-
+	
 	private IRubyObject cli(String... commands) {
 		return env.callCli("cli", commands);
 	}

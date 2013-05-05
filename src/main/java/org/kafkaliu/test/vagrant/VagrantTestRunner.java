@@ -1,10 +1,10 @@
 package org.kafkaliu.test.vagrant;
-import java.io.File;
+import static org.kafkaliu.test.vagrant.VagrantUtils.getVagrantLog;
+import static org.kafkaliu.test.vagrant.VagrantUtils.getVagrantfilePath;
 
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
-import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 
 public class VagrantTestRunner extends BlockJUnit4ClassRunner {
@@ -27,24 +27,5 @@ public class VagrantTestRunner extends BlockJUnit4ClassRunner {
 	@Override
 	protected Statement withAfterClasses(Statement statement) {
 		return super.withAfterClasses(new VagrantRunAfters(statement, vagrantEnv, klass));
-	}
-
-	private static File getVagrantfilePath(Class<?> klass)
-			throws InitializationError {
-		VagrantConfigure annotation = klass
-				.getAnnotation(VagrantConfigure.class);
-		File workingDir = annotation == null ? new File(".") : new File(
-				annotation.vagrantfilePath());
-		if (workingDir.exists()) {
-			return workingDir;
-		}
-		throw new InitializationError(String.format(
-				"class '%s' must have a valid VagrantfilePath",
-				klass.getName()));
-	}
-	
-	public static String getVagrantLog(Class<?> klass) {
-		VagrantConfigure annotation = klass.getAnnotation(VagrantConfigure.class);
-		return annotation == null ? null : annotation.vagrantLog();
 	}
 }

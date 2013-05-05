@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.runners.model.InitializationError;
+import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
+
 public class VagrantUtils {
 	public static Map<String, String> generateHostGuestSharedFolderMapping(String paths, String guestPrefix) {
 		return generateHostGuestSharedFolderMapping(paths.split(File.pathSeparator), guestPrefix);
@@ -49,5 +52,22 @@ public class VagrantUtils {
 		return null;
 	}
 	
+	public static File getVagrantfilePath(Class<?> klass)
+			throws InitializationError {
+		VagrantConfigure annotation = klass
+				.getAnnotation(VagrantConfigure.class);
+		File workingDir = annotation == null ? new File(".") : new File(
+				annotation.vagrantfilePath());
+		if (workingDir.exists()) {
+			return workingDir;
+		}
+		throw new InitializationError(String.format(
+				"class '%s' must have a valid VagrantfilePath",
+				klass.getName()));
+	}
 	
+	public static String getVagrantLog(Class<?> klass) {
+		VagrantConfigure annotation = klass.getAnnotation(VagrantConfigure.class);
+		return annotation == null ? null : annotation.vagrantLog();
+	}
 }
