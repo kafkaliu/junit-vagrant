@@ -2,6 +2,7 @@ package org.kafkaliu.test.vagrant.ruby;
 
 import java.util.List;
 
+import org.jruby.RubyArray;
 import org.jruby.RubyObject;
 import org.jruby.RubySymbol;
 public class VagrantMachine {
@@ -29,7 +30,7 @@ public class VagrantMachine {
 	
 	@SuppressWarnings("unchecked")
 	public List<RubySymbol> getMachineNames() {
-		return (List<RubySymbol>) vagrantEnv.callCli("machine_names");
+		return (RubyArray) vagrantEnv.callCli("machine_names");
 	}
 	
 	private RubyObject method(String name, String... args) {

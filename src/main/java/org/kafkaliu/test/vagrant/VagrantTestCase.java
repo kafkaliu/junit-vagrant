@@ -39,7 +39,7 @@ public class VagrantTestCase {
 	
 	protected Object[] request(URL url) throws Exception {
 		ContentExchange exchange = new ContentExchange();
-		exchange.setURL(url.getProtocol() + "://" + url.getHost() + ":" + url.getPort());
+		exchange.setURL(url.toString());
 
 		HttpClient client = new HttpClient();
 		client.start();

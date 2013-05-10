@@ -41,7 +41,7 @@ public class VagrantRunBefores extends Statement {
 		syncedClasspaths();
 		cli.up();
 		startApplication();
-		Thread.sleep(5 * 1000);
+		Thread.sleep(10 * 1000);
 		statement.evaluate();
 	}
 
