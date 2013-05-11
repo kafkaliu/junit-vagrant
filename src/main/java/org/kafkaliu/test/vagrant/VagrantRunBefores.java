@@ -1,17 +1,17 @@
 package org.kafkaliu.test.vagrant;
 
-import static org.kafkaliu.test.vagrant.VagrantUtils.*;
 import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
+import static org.kafkaliu.test.vagrant.server.VagrantUtils.*;
 
 import java.util.Map;
 
 import org.jruby.RubyObject;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
-import org.kafkaliu.test.vagrant.annotations.VagrantTestApplication;
 import org.kafkaliu.test.vagrant.ruby.VagrantCli;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 import org.kafkaliu.test.vagrant.ruby.VagrantMachine;
+import org.kafkaliu.test.vagrant.server.annotations.VagrantTestApplication;
 
 public class VagrantRunBefores extends Statement {
 
@@ -40,22 +40,23 @@ public class VagrantRunBefores extends Statement {
 	public void evaluate() throws Throwable {
 		syncedClasspaths();
 		cli.up();
-		startApplication();
-		Thread.sleep(10 * 1000);
+		String serverApp = getTestApplicationMain();
+		if (serverApp != null) {
+			startApplication(serverApp);
+		}
 		statement.evaluate();
 	}
 
-	private void startApplication() throws InitializationError {
-		final String command = "nohup java -cp " + convertToGuestPaths(System.getProperty("java.class.path"), guestpath) + " " + getTestApplicationMain() + " > /dev/null 2>&1 &";
+	private void startApplication(String serverApp) throws Throwable {
+		final String command = "nohup java -cp " + convertToGuestPaths(System.getProperty("java.class.path"), guestpath) + " " + serverApp + " > /dev/null 2>&1 &";
 		cli.ssh(command);
+		Thread.sleep(10 * 1000);
 	}
 	
 	private String getTestApplicationMain() throws InitializationError {
 		VagrantTestApplication testApplication = klass.getAnnotation(VagrantTestApplication.class);
 		if (testApplication == null) {
-			throw new InitializationError(String.format(
-					"class '%s' must have a valid VagrantTestApplication",
-					klass.getName()));
+			return null;
 		}
 		return testApplication.value().getName();
 	}

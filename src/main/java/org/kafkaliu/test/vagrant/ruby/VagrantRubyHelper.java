@@ -5,6 +5,10 @@ import org.jruby.RubySymbol;
 import org.jruby.runtime.builtin.IRubyObject;
 
 public class VagrantRubyHelper {
+	public static IRubyObject argsAsString(VagrantEnvironment vagrantEnv, String command) {
+		return argsAsString(vagrantEnv, new String[] { command })[0];
+	}
+	
 	public static IRubyObject[] argsAsString(VagrantEnvironment vagrantEnv, String... commands) {
 		IRubyObject[] args = new IRubyObject[commands.length];
 		for (int i = 0; i < commands.length; i++) {
