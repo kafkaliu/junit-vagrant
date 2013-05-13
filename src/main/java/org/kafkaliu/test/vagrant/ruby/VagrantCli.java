@@ -49,12 +49,26 @@ public class VagrantCli {
 		cli("resume");
 	}
 	
-	public Map<String, Map<String, String>> ssh(String command) {
+	private Map<String, Map<String, String>> ssh(String command) {
 		Map<String, Map<String, String>> results = new HashMap<String, Map<String, String>>();
-		for (RubyObject vm : vagrantMachine.getMachines()) {
-			results.put(vm.getInstanceVariable("@name").asJavaString(), ssh(vm, command));
+		for (RubySymbol vmName : vagrantMachine.getMachineNames()) {
+			results.put(vmName.asJavaString(), sshOne(vmName.asJavaString(), command));
 		}
 		return results;
+	}
+	
+	public Map<String, Map<String, String>> ssh(String vmName, String command) {
+		if (vmName == null || vmName.isEmpty()) {
+			return ssh(command);
+		} else {
+			Map<String, Map<String, String>> result = new HashMap<String, Map<String,String>>();
+			result.put(vmName, sshOne(vmName, command));
+			return result;
+		}
+	}
+	
+	private Map<String, String> sshOne(String vmName, String command) {
+		return ssh(vagrantMachine.getMachine(vmName), command);
 	}
 	
 	// refer to ssh_run.rb

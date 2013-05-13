@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.runners.model.InitializationError;
-import org.kafkaliu.test.vagrant.server.annotations.VagrantConfigure;
+import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
 
 public class VagrantUtils {
 	public static Map<String, String> generateHostGuestSharedFolderMapping(String paths, String guestPrefix) {

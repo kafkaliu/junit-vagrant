@@ -20,6 +20,7 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.kafkaliu.test.vagrant.VagrantRunAfters;
 import org.kafkaliu.test.vagrant.VagrantRunBefores;
+import org.kafkaliu.test.vagrant.annotations.VagrantVirtualMachine;
 import org.kafkaliu.test.vagrant.ruby.VagrantCli;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 
@@ -88,7 +89,7 @@ public class VagrantVirtualMachineTestRunner extends BlockJUnit4ClassRunner {
 						for (Object object : (JSONArray) out.get("failures")) {
 							stackTrace.append(((JSONObject) object).get("trace"));
 						}
-						notifier.fireTestFailure(new Failure(description, new RuntimeException(MessageFormat.format("Virtual machine '{0}' throws exception:\n{1}", vmName, stackTrace))));
+						notifier.fireTestFailure(new Failure(description, new RuntimeException(MessageFormat.format("Virtual machine {0} throws exception:\n{1}", vmName, stackTrace))));
 					}
 				}
 				if (allSuccessful) {
@@ -99,10 +100,15 @@ public class VagrantVirtualMachineTestRunner extends BlockJUnit4ClassRunner {
 	}
 	
 	private Map<String, Map<String, String>> startTestingInVms(String methodName) {
-		final String command = "java -Dvagrant.isinvm=true -cp " + convertToGuestPaths(System.getProperty("java.class.path"), guestpath) + " " + SingleJUnitTestRunner.class.getName() + " " + klass.getName() + "#" + methodName;
-		return cli.ssh(command);
+		String command = "java -Djava.library.path=" + convertToGuestPaths(System.getProperty("java.library.path"), guestpath) + " -Dvagrant.isinvm=true -cp " + convertToGuestPaths(System.getProperty("java.class.path"), guestpath) + " " + SingleJUnitTestRunner.class.getName() + " " + klass.getName() + "#" + methodName;
+		return cli.ssh(getVirtualMachine(), command);
 	}
 
+	private String getVirtualMachine() {
+		VagrantVirtualMachine vm = klass.getAnnotation(VagrantVirtualMachine.class);
+		return vm == null ? null : vm.value();
+	}
+	
 	private boolean isInVagrantVm() {
 		return Boolean.valueOf(System.getProperty("vagrant.isinvm"));
 	}

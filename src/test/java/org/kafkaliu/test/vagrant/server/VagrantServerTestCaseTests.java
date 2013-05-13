@@ -7,8 +7,8 @@ import java.net.URL;
 import org.eclipse.jetty.client.HttpExchange;
 import org.junit.Test;
 import org.junit.runners.model.InitializationError;
-import org.kafkaliu.test.vagrant.server.annotations.VagrantConfigure;
-import org.kafkaliu.test.vagrant.server.annotations.VagrantTestApplication;
+import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
+import org.kafkaliu.test.vagrant.annotations.VagrantTestApplication;
 
 @VagrantConfigure(vagrantfilePath = "src/test/resources/server")
 @VagrantTestApplication(TestServer.class)

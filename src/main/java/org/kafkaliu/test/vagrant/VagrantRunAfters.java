@@ -6,10 +6,11 @@ import java.util.List;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.Statement;
+import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
+import org.kafkaliu.test.vagrant.annotations.VagrantVirtualMachine;
 import org.kafkaliu.test.vagrant.ruby.VagrantCli;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 import org.kafkaliu.test.vagrant.server.VagrantServerTestRunner;
-import org.kafkaliu.test.vagrant.server.annotations.VagrantConfigure;
 
 public class VagrantRunAfters extends Statement {
 	
@@ -38,8 +39,8 @@ public class VagrantRunAfters extends Statement {
         	if (annotation != null && annotation.needDestroyVmAfterClassTest()) {
         		cli.destroy();
         	} else {
-        		if (klass.getAnnotation(RunWith.class).annotationType().isAssignableFrom(VagrantServerTestRunner.class)) {
-		        	cli.ssh("killall java");
+        		if (klass.getAnnotation(RunWith.class).value().isAssignableFrom(VagrantServerTestRunner.class)) {
+        			cli.ssh(getVirtualMachine(), "killall java");
 		        	Thread.sleep(5 * 1000);
         		}
         	}
@@ -47,4 +48,8 @@ public class VagrantRunAfters extends Statement {
         MultipleFailureException.assertEmpty(errors);
 	}
 
+	private String getVirtualMachine() {
+		VagrantVirtualMachine vm = klass.getAnnotation(VagrantVirtualMachine.class);
+		return vm == null ? null : vm.value();
+	}
 }

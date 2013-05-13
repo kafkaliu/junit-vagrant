@@ -6,10 +6,12 @@ import java.text.MessageFormat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kafkaliu.test.vagrant.server.annotations.VagrantConfigure;
+import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
+import org.kafkaliu.test.vagrant.annotations.VagrantVirtualMachine;
 
 @RunWith(VagrantVirtualMachineTestRunner.class)
 @VagrantConfigure(vagrantfilePath = "src/test/resources/container", needDestroyVmAfterClassTest=true)
+@VagrantVirtualMachine("default")
 public class VagrantVirtualMachineTestRunnerTests {
 
 	@Test

@@ -36,7 +36,6 @@ public class SingleJUnitTestRunner {
         
         JSONArray failures = new JSONArray();
         
-        json.put("failures", failures);
         for (Failure failure : result.getFailures()) {
 			JSONObject jsonFailure = new JSONObject();
 			jsonFailure.put("message", failure.getMessage());
@@ -44,6 +43,7 @@ public class SingleJUnitTestRunner {
 			jsonFailure.put("trace", failure.getTrace());
 			failures.add(jsonFailure);
 		}
+        json.put("failures", failures);
         
         System.setOut(oldOut);
         System.setErr(oldErr);
