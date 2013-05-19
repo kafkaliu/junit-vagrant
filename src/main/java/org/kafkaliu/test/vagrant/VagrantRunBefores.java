@@ -9,6 +9,7 @@ import java.util.Map;
 import org.jruby.RubyObject;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
 import org.kafkaliu.test.vagrant.annotations.VagrantTestApplication;
 import org.kafkaliu.test.vagrant.annotations.VagrantVirtualMachine;
 import org.kafkaliu.test.vagrant.ruby.VagrantCli;
@@ -40,8 +41,10 @@ public class VagrantRunBefores extends Statement {
 
 	@Override
 	public void evaluate() throws Throwable {
-		syncedPaths();
-		cli.up();
+		if (needUpVm()) {
+			syncedPaths();
+			cli.up();
+		}
 		String serverApp = getTestApplicationMain();
 		if (serverApp != null) {
 			startApplication(serverApp);
@@ -59,6 +62,11 @@ public class VagrantRunBefores extends Statement {
 	private String getVirtualMachine() {
 		VagrantVirtualMachine vm = klass.getAnnotation(VagrantVirtualMachine.class);
 		return vm == null ? null : vm.value();
+	}
+	
+	private boolean needUpVm() {
+		VagrantConfigure config = klass.getAnnotation(VagrantConfigure.class);
+		return config.needUpVmBeforeClassTest();
 	}
 	
 	private String getTestApplicationMain() throws InitializationError {

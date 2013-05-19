@@ -13,4 +13,5 @@ public @interface VagrantConfigure {
 	String vagrantfilePath();
 	String vagrantLog() default "";
 	boolean needDestroyVmAfterClassTest() default true;
+	boolean needUpVmBeforeClassTest() default true;
 }

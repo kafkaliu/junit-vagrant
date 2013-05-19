@@ -29,8 +29,16 @@ public class VagrantServerTestCase {
 		vagrantMachine = new VagrantMachine(vagrantEnv);
 	}
 
+	protected void start(String vmName) {
+		vagrantCli.up(vmName);
+	}
+	
 	protected void shutdown(String vmName) {
 		vagrantCli.halt(vmName);
+	}
+	
+	protected void ssh(String vmName, String command) {
+		vagrantCli.ssh(vmName, command);
 	}
 	
 	protected String status(String vmName) {
