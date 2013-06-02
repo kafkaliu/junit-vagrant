@@ -11,5 +11,6 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface VagrantTestApplication {
 	
-	Class<?> value();
+	Class<?> klass();
+	String args() default "";
 }

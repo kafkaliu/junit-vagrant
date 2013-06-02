@@ -11,7 +11,7 @@ import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
 import org.kafkaliu.test.vagrant.annotations.VagrantTestApplication;
 
 @VagrantConfigure(vagrantfilePath = "src/test/resources/server")
-@VagrantTestApplication(TestServer.class)
+@VagrantTestApplication(klass=TestServer.class, args="testarg")
 public class VagrantServerTestCaseTests extends VagrantServerTestCase {
 	
 	public VagrantServerTestCaseTests() throws InitializationError {

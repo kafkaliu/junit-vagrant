@@ -4,6 +4,7 @@ import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.convertToGuestPaths;
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.generateHostGuestSharedFolderMapping;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.jruby.RubyObject;
@@ -45,15 +46,14 @@ public class VagrantRunBefores extends Statement {
 			syncedPaths();
 			cli.up();
 		}
-		String serverApp = getTestApplicationMain();
-		if (serverApp != null) {
-			startApplication(serverApp);
+		if (getTestApplicationMain() != null) {
+			startApplication(getTestApplicationMain().klass().getName(), getTestApplicationMain().args());
 		}
 		statement.evaluate();
 	}
 
-	private Object startApplication(String serverApp) throws Throwable {
-		final String command = "nohup java -Djava.library.path=" + convertToGuestPaths(System.getProperty("java.library.path"), guestpath) + " -cp " + convertToGuestPaths(System.getProperty("java.class.path"), guestpath) + " " + serverApp + " > /dev/null 2>&1 &";
+	private Object startApplication(String serverApp, String args) throws Throwable {
+		final String command = MessageFormat.format("nohup java -Djava.library.path={0} -cp {1} {2} {3} > /dev/null 2>&1 &", convertToGuestPaths(System.getProperty("java.library.path"), guestpath), convertToGuestPaths(System.getProperty("java.class.path"), guestpath), serverApp, args != null ? args : "");
 		Map<String, Map<String, String>> result = cli.ssh(getVirtualMachine(), command);
 		Thread.sleep(10 * 1000);
 		return result;
@@ -69,12 +69,9 @@ public class VagrantRunBefores extends Statement {
 		return config.needUpVmBeforeClassTest();
 	}
 	
-	private String getTestApplicationMain() throws InitializationError {
+	private VagrantTestApplication getTestApplicationMain() throws InitializationError {
 		VagrantTestApplication testApplication = klass.getAnnotation(VagrantTestApplication.class);
-		if (testApplication == null) {
-			return null;
-		}
-		return testApplication.value().getName();
+		return testApplication;
 	}
 
 	private void syncedPaths() {

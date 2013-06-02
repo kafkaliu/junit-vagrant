@@ -21,6 +21,7 @@ public class TestServer {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
+	  if (args == null || args.length < 1) throw new IllegalArgumentException();
 		HazelcastInstance intance = Hazelcast.newHazelcastInstance();
 		Server server = new Server(8080);
 		IdGenerator id = intance.getIdGenerator("test-cluster");
