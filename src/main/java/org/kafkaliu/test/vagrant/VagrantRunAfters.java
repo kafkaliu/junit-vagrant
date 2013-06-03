@@ -40,7 +40,10 @@ public class VagrantRunAfters extends Statement {
         		cli.destroy();
         	} else {
         		if (klass.getAnnotation(RunWith.class).value().isAssignableFrom(VagrantServerTestRunner.class)) {
-        			cli.ssh(getVirtualMachine(), "killall java");
+        		  try {
+        		    cli.ssh(getVirtualMachine(), "killall java");
+        		  } catch (Exception e) {
+        		  }
 		        	Thread.sleep(5 * 1000);
         		}
         	}
