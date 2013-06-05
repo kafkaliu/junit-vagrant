@@ -13,4 +13,5 @@ public @interface VagrantTestApplication {
 	
 	Class<?> klass();
 	String args() default "";
+	boolean isDaemon() default true;
 }

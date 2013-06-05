@@ -47,13 +47,21 @@ public class VagrantRunBefores extends Statement {
 			cli.up();
 		}
 		if (getTestApplicationMain() != null) {
-			startApplication(getTestApplicationMain().klass().getName(), getTestApplicationMain().args());
+			startApplication(getTestApplicationMain());
 		}
 		statement.evaluate();
 	}
 
-	private Object startApplication(String serverApp, String args) throws Throwable {
-		final String command = MessageFormat.format("nohup java -Djava.library.path={0} -cp {1} {2} {3} > /dev/null 2>&1 &", convertToGuestPaths(System.getProperty("java.library.path"), guestpath), convertToGuestPaths(System.getProperty("java.class.path"), guestpath), serverApp, args != null ? args : "");
+	private Object startApplication(VagrantTestApplication annotation) throws Throwable {
+		String serverApp = annotation.klass().getName();
+		String args = annotation.args();
+		boolean isDaemon = annotation.isDaemon();
+		String command = null;
+		if (isDaemon) {
+			command = MessageFormat.format("nohup java -Djava.library.path={0} -cp {1} {2} {3} > /dev/null 2>&1 &", convertToGuestPaths(System.getProperty("java.library.path"), guestpath), convertToGuestPaths(System.getProperty("java.class.path"), guestpath), serverApp, args != null ? args : "");
+		} else {
+			command = MessageFormat.format("java -Djava.library.path={0} -cp {1} {2} {3}", convertToGuestPaths(System.getProperty("java.library.path"), guestpath), convertToGuestPaths(System.getProperty("java.class.path"), guestpath), serverApp, args != null ? args : "");
+		}
 		Map<String, Map<String, String>> result = cli.ssh(getVirtualMachine(), command);
 		Thread.sleep(10 * 1000);
 		return result;
