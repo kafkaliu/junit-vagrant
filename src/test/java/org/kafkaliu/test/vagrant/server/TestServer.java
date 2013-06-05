@@ -16,34 +16,34 @@ import com.hazelcast.core.IdGenerator;
 
 public class TestServer {
 
-	/**
-	 * @param args
-	 * @throws Exception 
-	 */
-	public static void main(String[] args) throws Exception {
-	  if (args == null || args.length < 1) throw new IllegalArgumentException();
-		HazelcastInstance intance = Hazelcast.newHazelcastInstance();
-		Server server = new Server(8080);
-		IdGenerator id = intance.getIdGenerator("test-cluster");
-		server.setHandler(new TestServerHandler(id.newId()));
-		server.start();
-		server.join();
-	}
-	
-	private static class TestServerHandler extends AbstractHandler {
-		private long id;
-		
-		public TestServerHandler(long id) {
-			this.id = id;
-		}
+  /**
+   * @param args
+   * @throws Exception
+   */
+  public static void main(String[] args) throws Exception {
+    if (args == null || args.length < 1)
+      throw new IllegalArgumentException();
+    HazelcastInstance intance = Hazelcast.newHazelcastInstance();
+    Server server = new Server(8080);
+    IdGenerator id = intance.getIdGenerator("test-cluster");
+    server.setHandler(new TestServerHandler(id.newId()));
+    server.start();
+    server.join();
+  }
 
-		@Override
-		public void handle(String target, Request baseRequest, HttpServletRequest request,
-				HttpServletResponse response) throws IOException, ServletException {
-			response.setContentType("text/json;charset=utf-8");
-	        response.setStatus(HttpServletResponse.SC_OK);
-	        baseRequest.setHandled(true);
-	        response.getWriter().print(id);
-		}
-	}
+  private static class TestServerHandler extends AbstractHandler {
+    private long id;
+
+    public TestServerHandler(long id) {
+      this.id = id;
+    }
+
+    @Override
+    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+      response.setContentType("text/json;charset=utf-8");
+      response.setStatus(HttpServletResponse.SC_OK);
+      baseRequest.setHandled(true);
+      response.getWriter().print(id);
+    }
+  }
 }

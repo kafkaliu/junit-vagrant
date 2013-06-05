@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface VagrantVirtualMachine {
-	
-	String value();
+
+  String value();
 }

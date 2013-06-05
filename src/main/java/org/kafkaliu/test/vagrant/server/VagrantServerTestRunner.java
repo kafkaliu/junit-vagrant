@@ -1,4 +1,5 @@
 package org.kafkaliu.test.vagrant.server;
+
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantLog;
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfile;
 
@@ -10,24 +11,24 @@ import org.kafkaliu.test.vagrant.VagrantRunBefores;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 
 public class VagrantServerTestRunner extends BlockJUnit4ClassRunner {
-	
-	private Class<?> klass;
-	
-	private VagrantEnvironment vagrantEnv;
 
-	public VagrantServerTestRunner(Class<?> klass) throws InitializationError {
-		super(klass);
-		this.klass = klass;
-		vagrantEnv = new VagrantEnvironment(getVagrantfile(klass), getVagrantLog(klass));
-	}
+  private Class<?> klass;
 
-	@Override
-	protected Statement withBeforeClasses(Statement statement) {
-		return super.withBeforeClasses(new VagrantRunBefores(statement, vagrantEnv, klass));
-	}
+  private VagrantEnvironment vagrantEnv;
 
-	@Override
-	protected Statement withAfterClasses(Statement statement) {
-		return super.withAfterClasses(new VagrantRunAfters(statement, vagrantEnv, klass));
-	}
+  public VagrantServerTestRunner(Class<?> klass) throws InitializationError {
+    super(klass);
+    this.klass = klass;
+    vagrantEnv = new VagrantEnvironment(getVagrantfile(klass), getVagrantLog(klass));
+  }
+
+  @Override
+  protected Statement withBeforeClasses(Statement statement) {
+    return super.withBeforeClasses(new VagrantRunBefores(statement, vagrantEnv, klass));
+  }
+
+  @Override
+  protected Statement withAfterClasses(Statement statement) {
+    return super.withAfterClasses(new VagrantRunAfters(statement, vagrantEnv, klass));
+  }
 }
