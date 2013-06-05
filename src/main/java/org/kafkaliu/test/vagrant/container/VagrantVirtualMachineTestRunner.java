@@ -26,90 +26,90 @@ import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 
 public class VagrantVirtualMachineTestRunner extends BlockJUnit4ClassRunner {
 
-	private VagrantEnvironment vagrantEnv;
-	
-	private VagrantCli cli;
+  private VagrantEnvironment vagrantEnv;
 
-	private Class<?> klass;
-	
-	private String guestpath = "/vagrant-junit";
+  private VagrantCli cli;
 
-	public VagrantVirtualMachineTestRunner(Class<?> klass) throws InitializationError {
-		super(klass);
-		this.klass = klass;
-		if (!isInVagrantVm()) {
-			vagrantEnv = new VagrantEnvironment(getVagrantfile(klass),
-					getVagrantLog(klass));
-			cli = new VagrantCli(vagrantEnv);
-		}
-	}
+  private Class<?> klass;
 
-	@Override
-	protected Statement withBeforeClasses(Statement statement) {
-		if (isInVagrantVm()) {
-			return super.withBeforeClasses(statement);
-		} else {
-			return new VagrantRunBefores(statement, vagrantEnv, klass);
-		}
-	}
+  private String guestpath = "/vagrant-junit";
 
-	@Override
-	protected Statement withAfterClasses(Statement statement) {
-		if (isInVagrantVm()) {
-			return super.withAfterClasses(statement);
-		} else {
-			return new VagrantRunAfters(statement, vagrantEnv, klass);
-		}
-	}
+  public VagrantVirtualMachineTestRunner(Class<?> klass) throws InitializationError {
+    super(klass);
+    this.klass = klass;
+    if (!isInVagrantVm()) {
+      vagrantEnv = new VagrantEnvironment(getVagrantfile(klass), getVagrantLog(klass));
+      cli = new VagrantCli(vagrantEnv);
+    }
+  }
 
-	@Override
-	protected void runChild(FrameworkMethod method, RunNotifier notifier) {
-		Description description = describeChild(method);
-		if (isInVagrantVm()) {
-			super.runChild(method, notifier);
-		} else {
-			if (method.getAnnotation(Ignore.class) != null) {
-				notifier.fireTestIgnored(description);
-			} else {
-				notifier.fireTestStarted(description);
-				Map<String, Map<String, String>> testingResults = startTestingInVms(method.getName());
+  @Override
+  protected Statement withBeforeClasses(Statement statement) {
+    if (isInVagrantVm()) {
+      return super.withBeforeClasses(statement);
+    } else {
+      return new VagrantRunBefores(statement, vagrantEnv, klass);
+    }
+  }
 
-				boolean allSuccessful = true;
-				for (String vmName : testingResults.keySet()) {
-					Map<String, String> testingResult = testingResults.get(vmName);
-					String stdout = testingResult.get("stdout");
-//					String stderr = testingResult.get("stderr");
-					JSONObject out = JSONObject.fromObject(stdout);
-					System.out.print(out.get("out"));
-					System.err.print(out.get("err"));
-					
-					if (!Boolean.valueOf(out.getString("wasSuccessful"))) {
-						allSuccessful = false;
-						StringBuffer stackTrace = new StringBuffer();
-						for (Object object : (JSONArray) out.get("failures")) {
-							stackTrace.append(((JSONObject) object).get("trace"));
-						}
-						notifier.fireTestFailure(new Failure(description, new RuntimeException(MessageFormat.format("Virtual machine {0} throws exception:\n{1}", vmName, stackTrace))));
-					}
-				}
-				if (allSuccessful) {
-					notifier.fireTestFinished(describeChild(method));
-				}
-			}
-		}
-	}
-	
-	private Map<String, Map<String, String>> startTestingInVms(String methodName) {
-		String command = "java -Djava.library.path=" + convertToGuestPaths(System.getProperty("java.library.path"), guestpath) + " -Dvagrant.isinvm=true -cp " + convertToGuestPaths(System.getProperty("java.class.path"), guestpath) + " " + SingleJUnitTestRunner.class.getName() + " " + klass.getName() + "#" + methodName;
-		return cli.ssh(getVirtualMachine(), command);
-	}
+  @Override
+  protected Statement withAfterClasses(Statement statement) {
+    if (isInVagrantVm()) {
+      return super.withAfterClasses(statement);
+    } else {
+      return new VagrantRunAfters(statement, vagrantEnv, klass);
+    }
+  }
 
-	private String getVirtualMachine() {
-		VagrantVirtualMachine vm = klass.getAnnotation(VagrantVirtualMachine.class);
-		return vm == null ? null : vm.value();
-	}
-	
-	private boolean isInVagrantVm() {
-		return Boolean.valueOf(System.getProperty("vagrant.isinvm"));
-	}
+  @Override
+  protected void runChild(FrameworkMethod method, RunNotifier notifier) {
+    Description description = describeChild(method);
+    if (isInVagrantVm()) {
+      super.runChild(method, notifier);
+    } else {
+      if (method.getAnnotation(Ignore.class) != null) {
+        notifier.fireTestIgnored(description);
+      } else {
+        notifier.fireTestStarted(description);
+        Map<String, Map<String, String>> testingResults = startTestingInVms(method.getName());
+
+        boolean allSuccessful = true;
+        for (String vmName : testingResults.keySet()) {
+          Map<String, String> testingResult = testingResults.get(vmName);
+          String stdout = testingResult.get("stdout");
+          // String stderr = testingResult.get("stderr");
+          JSONObject out = JSONObject.fromObject(stdout);
+          System.out.print(out.get("out"));
+          System.err.print(out.get("err"));
+
+          if (!Boolean.valueOf(out.getString("wasSuccessful"))) {
+            allSuccessful = false;
+            StringBuffer stackTrace = new StringBuffer();
+            for (Object object : (JSONArray) out.get("failures")) {
+              stackTrace.append(((JSONObject) object).get("trace"));
+            }
+            notifier.fireTestFailure(new Failure(description, new RuntimeException(MessageFormat.format("Virtual machine {0} throws exception:\n{1}", vmName, stackTrace))));
+          }
+        }
+        if (allSuccessful) {
+          notifier.fireTestFinished(describeChild(method));
+        }
+      }
+    }
+  }
+
+  private Map<String, Map<String, String>> startTestingInVms(String methodName) {
+    String command = "java -Djava.library.path=" + convertToGuestPaths(System.getProperty("java.library.path"), guestpath) + " -Dvagrant.isinvm=true -cp "
+        + convertToGuestPaths(System.getProperty("java.class.path"), guestpath) + " " + SingleJUnitTestRunner.class.getName() + " " + klass.getName() + "#" + methodName;
+    return cli.ssh(getVirtualMachine(), command);
+  }
+
+  private String getVirtualMachine() {
+    VagrantVirtualMachine vm = klass.getAnnotation(VagrantVirtualMachine.class);
+    return vm == null ? null : vm.value();
+  }
+
+  private boolean isInVagrantVm() {
+    return Boolean.valueOf(System.getProperty("vagrant.isinvm"));
+  }
 }

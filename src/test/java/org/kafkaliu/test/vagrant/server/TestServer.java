@@ -1,49 +1,30 @@
 package org.kafkaliu.test.vagrant.server;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IdGenerator;
-
+@SuppressWarnings("restriction")
 public class TestServer {
 
-	/**
-	 * @param args
-	 * @throws Exception 
-	 */
-	public static void main(String[] args) throws Exception {
-	  if (args == null || args.length < 1) throw new IllegalArgumentException();
-		HazelcastInstance intance = Hazelcast.newHazelcastInstance();
-		Server server = new Server(8080);
-		IdGenerator id = intance.getIdGenerator("test-cluster");
-		server.setHandler(new TestServerHandler(id.newId()));
-		server.start();
-		server.join();
-	}
-	
-	private static class TestServerHandler extends AbstractHandler {
-		private long id;
-		
-		public TestServerHandler(long id) {
-			this.id = id;
-		}
+  public static void main(String[] args) throws Exception {
+    HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+    server.createContext("/", new MyHandler());
+    server.setExecutor(null); // creates a default executor
+    server.start();
+  }
 
-		@Override
-		public void handle(String target, Request baseRequest, HttpServletRequest request,
-				HttpServletResponse response) throws IOException, ServletException {
-			response.setContentType("text/json;charset=utf-8");
-	        response.setStatus(HttpServletResponse.SC_OK);
-	        baseRequest.setHandled(true);
-	        response.getWriter().print(id);
-		}
-	}
+  static class MyHandler implements HttpHandler {
+    public void handle(HttpExchange t) throws IOException {
+      String response = "Hello Money!";
+      t.sendResponseHeaders(200, response.length());
+      OutputStream os = t.getResponseBody();
+      os.write(response.getBytes());
+      os.close();
+    }
+  }
 }

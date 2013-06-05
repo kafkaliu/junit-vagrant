@@ -10,8 +10,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface VagrantTestApplication {
-	
-	Class<?> klass();
-	String args() default "";
-	boolean isDaemon() default true;
+
+  Class<?> klass();
+
+  String args() default "";
+
+  boolean isDaemon() default true;
+
+  String logfile() default "";
 }
