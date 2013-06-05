@@ -20,10 +20,10 @@ public class VagrantEnvironment {
 	private RubyObject env;
 
 	@SuppressWarnings("unchecked")
-	public VagrantEnvironment(File workingDir, PrintStream out, PrintStream err, String vagrantLog, String uiClass) {
-		if (!workingDir.exists()) {
-			throw new RuntimeException("Working directory not exists: "
-					+ workingDir);
+	public VagrantEnvironment(File vagrantfile, PrintStream out, PrintStream err, String vagrantLog, String uiClass) {
+		if (!vagrantfile.exists()) {
+			throw new RuntimeException("Vagrantfile not exists: "
+					+ vagrantfile);
 		}
 		scriptingContainer = new ScriptingContainer(
 				LocalContextScope.SINGLETHREAD);
@@ -47,12 +47,12 @@ public class VagrantEnvironment {
 		env = (RubyObject) scriptingContainer
 				.runScriptlet("require 'vagrant'\n" + "\n"
 						+ "return Vagrant::Environment.new(:cwd => '"
-						+ workingDir.getAbsolutePath() + "', :ui_class => " + uiClass + ")");
+						+ vagrantfile.getAbsoluteFile().getParent() + "', :vagrantfile_name => '" + vagrantfile.getName() + "', :ui_class => " + uiClass + ")");
 		
 	}
 	
-	public VagrantEnvironment(File workingDir, String vagrantLog) {
-		this(workingDir, null, null, vagrantLog, null);
+	public VagrantEnvironment(File vagrantfile, String vagrantLog) {
+		this(vagrantfile, null, null, vagrantLog, null);
 	}
 	
 	public IRubyObject callCli(String name, String... args) {

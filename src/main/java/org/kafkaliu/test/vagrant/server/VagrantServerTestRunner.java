@@ -1,6 +1,6 @@
 package org.kafkaliu.test.vagrant.server;
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantLog;
-import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfilePath;
+import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfile;
 
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
@@ -18,7 +18,7 @@ public class VagrantServerTestRunner extends BlockJUnit4ClassRunner {
 	public VagrantServerTestRunner(Class<?> klass) throws InitializationError {
 		super(klass);
 		this.klass = klass;
-		vagrantEnv = new VagrantEnvironment(getVagrantfilePath(klass), getVagrantLog(klass));
+		vagrantEnv = new VagrantEnvironment(getVagrantfile(klass), getVagrantLog(klass));
 	}
 
 	@Override

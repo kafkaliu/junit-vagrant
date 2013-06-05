@@ -1,7 +1,7 @@
 package org.kafkaliu.test.vagrant.server;
 
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantLog;
-import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfilePath;
+import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfile;
 
 import java.net.URL;
 
@@ -24,7 +24,7 @@ public class VagrantServerTestCase {
 	private VagrantMachine vagrantMachine;
 
 	public VagrantServerTestCase() throws InitializationError {
-		vagrantEnv = new VagrantEnvironment(getVagrantfilePath(getClass()), getVagrantLog(getClass()));
+		vagrantEnv = new VagrantEnvironment(getVagrantfile(getClass()), getVagrantLog(getClass()));
 		vagrantCli = new VagrantCli(vagrantEnv);
 		vagrantMachine = new VagrantMachine(vagrantEnv);
 	}

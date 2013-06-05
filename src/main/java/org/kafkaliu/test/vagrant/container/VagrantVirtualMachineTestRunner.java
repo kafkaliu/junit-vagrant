@@ -2,7 +2,7 @@ package org.kafkaliu.test.vagrant.container;
 
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.convertToGuestPaths;
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantLog;
-import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfilePath;
+import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfile;
 
 import java.text.MessageFormat;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class VagrantVirtualMachineTestRunner extends BlockJUnit4ClassRunner {
 		super(klass);
 		this.klass = klass;
 		if (!isInVagrantVm()) {
-			vagrantEnv = new VagrantEnvironment(getVagrantfilePath(klass),
+			vagrantEnv = new VagrantEnvironment(getVagrantfile(klass),
 					getVagrantLog(klass));
 			cli = new VagrantCli(vagrantEnv);
 		}

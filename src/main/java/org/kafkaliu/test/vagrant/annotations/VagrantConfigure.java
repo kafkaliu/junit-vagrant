@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface VagrantConfigure {
-	String vagrantfilePath();
+//	String vagrantfilePath();
+	String vagrantfile();
 	String vagrantLog() default "";
 	boolean needDestroyVmAfterClassTest() default true;
 	boolean needUpVmBeforeClassTest() default true;
