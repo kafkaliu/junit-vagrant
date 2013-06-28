@@ -1,12 +1,12 @@
 package org.kafkaliu.test.vagrant.server;
 
+import org.junit.runners.model.InitializationError;
+import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.runners.model.InitializationError;
-import org.kafkaliu.test.vagrant.annotations.VagrantConfigure;
 
 public class VagrantUtils {
   public static Map<String, String> generateHostGuestSharedFolderMapping(String paths, String guestPrefix) {
@@ -23,6 +23,9 @@ public class VagrantUtils {
     String result = "";
     for (String path : convertToGuestPaths(paths.split(File.pathSeparator), guestPrefix)) {
       result += path + File.pathSeparator;
+    }
+    if (result.endsWith(File.pathSeparator)) {
+      result = result.substring(0, result.length() - 1);
     }
     return result;
   }
@@ -44,7 +47,10 @@ public class VagrantUtils {
     assert null != path && !path.isEmpty();
     try {
       String canonicalPath = new File(path).getCanonicalPath();
-      return String.format("\"%s\"", canonicalPath);
+      if (path.endsWith(File.separator)) {
+        canonicalPath = canonicalPath + File.separator;
+      }
+      return canonicalPath.contains(" ") ? String.format("\"%s\"", canonicalPath) : canonicalPath;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
