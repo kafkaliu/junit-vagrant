@@ -1,17 +1,18 @@
 package org.kafkaliu.test.vagrant.server;
 
-import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantLog;
-import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfile;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import org.jruby.RubyObject;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.InitializationError;
 import org.kafkaliu.test.vagrant.ruby.VagrantCli;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 import org.kafkaliu.test.vagrant.ruby.VagrantMachine;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Map;
+
+import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantLog;
+import static org.kafkaliu.test.vagrant.server.VagrantUtils.getVagrantfile;
 
 @RunWith(VagrantServerTestRunner.class)
 public class VagrantServerTestCase {
@@ -36,8 +37,8 @@ public class VagrantServerTestCase {
     vagrantCli.halt(vmName);
   }
 
-  protected void ssh(String vmName, String command) {
-    vagrantCli.ssh(vmName, command);
+  protected Map<String,Map<String,String>> ssh(String vmName, String command) {
+    return vagrantCli.ssh(vmName, command);
   }
 
   protected String status(String vmName) {
