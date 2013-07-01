@@ -10,6 +10,7 @@ import org.kafkaliu.test.vagrant.ruby.VagrantCli;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 import org.kafkaliu.test.vagrant.ruby.VagrantMachine;
 
+import java.net.InetAddress;
 import java.text.MessageFormat;
 import java.util.Map;
 
@@ -59,13 +60,17 @@ public class VagrantRunBefores extends Statement {
     boolean isDaemon = annotation.isDaemon();
     String vmJavaLibPath = convertToGuestPaths(System.getProperty("java.library.path"), guestpath);
     String vmJavaClassPath = convertToGuestPaths(System.getProperty("java.class.path"), guestpath);
+    String vagrantMasterIp = System.getProperty("vagrant.master.ip");
+    if (null == vagrantMasterIp) {
+      vagrantMasterIp = InetAddress.getLocalHost().getHostAddress();
+    }
     String command = null;
     if (isDaemon) {
-      command = MessageFormat.format("nohup java -Djava.library.path={0} -cp {1} {2} {3} > /dev/null 2>&1 &",
-              vmJavaLibPath, vmJavaClassPath, serverApp, args);
+      command = MessageFormat.format("nohup java -Djava.library.path={0} -Dvagrant.master.ip={1} -cp {2} {3} {4} > /dev/null 2>&1 &",
+              vmJavaLibPath, vagrantMasterIp, vmJavaClassPath, serverApp, args);
     } else {
-      command = MessageFormat.format("java -Djava.library.path={0} -cp {1} {2} {3}",
-              vmJavaLibPath, vmJavaClassPath, serverApp, args);
+      command = MessageFormat.format("java -Djava.library.path={0} -Dvagrant.master.ip={1} -cp {2} {3} {4}",
+              vmJavaLibPath, vagrantMasterIp, vmJavaClassPath, serverApp, args);
     }
     Map<String, Map<String, String>> result = cli.ssh(getVirtualMachine(), command);
     Thread.sleep(10 * 1000);
