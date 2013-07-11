@@ -10,7 +10,9 @@ import org.kafkaliu.test.vagrant.ruby.VagrantCli;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 import org.kafkaliu.test.vagrant.ruby.VagrantMachine;
 
-import java.net.InetAddress;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.Map;
 
@@ -53,6 +55,27 @@ public class VagrantRunBefores extends Statement {
     statement.evaluate();
   }
 
+  private String getClassEnvironmentVariables(Class<?> klass) {
+    try {
+      Method environmentVariables = klass.getMethod("environmentVariables", null);
+      assert Modifier.isStatic(environmentVariables.getModifiers());
+      Object ret = environmentVariables.invoke(null);
+      assert ret instanceof Map;
+      StringBuilder sb = new StringBuilder();
+      Map<String, String> map = (Map<String, String>) ret;
+      for (String key : map.keySet()) {
+        sb.append(String.format(" -D%s=%s ", key, map.get(key)));
+      }
+      return sb.toString();
+    } catch (NoSuchMethodException e) {
+      return "";
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private Object startApplication(VagrantTestApplication annotation) throws Throwable {
     String serverApp = annotation.klass().getName();
     String args = annotation.args();
@@ -60,17 +83,14 @@ public class VagrantRunBefores extends Statement {
     boolean isDaemon = annotation.isDaemon();
     String vmJavaLibPath = convertToGuestPaths(System.getProperty("java.library.path"), guestpath);
     String vmJavaClassPath = convertToGuestPaths(System.getProperty("java.class.path"), guestpath);
-    String vagrantMasterIp = System.getProperty("vagrant.master.ip");
-    if (null == vagrantMasterIp) {
-      vagrantMasterIp = InetAddress.getLocalHost().getHostAddress();
-    }
     String command = null;
+    String classEnvironmentVariables = getClassEnvironmentVariables(klass);
     if (isDaemon) {
-      command = MessageFormat.format("nohup java -Djava.library.path={0} -Dvagrant.master.ip={1} -cp {2} {3} {4} > /dev/null 2>&1 &",
-              vmJavaLibPath, vagrantMasterIp, vmJavaClassPath, serverApp, args);
+      command = MessageFormat.format("nohup java -Djava.library.path={0} {1} -cp {2} {3} {4} > /dev/null 2>&1 &",
+              vmJavaLibPath, classEnvironmentVariables, vmJavaClassPath, serverApp, args);
     } else {
-      command = MessageFormat.format("java -Djava.library.path={0} -Dvagrant.master.ip={1} -cp {2} {3} {4}",
-              vmJavaLibPath, vagrantMasterIp, vmJavaClassPath, serverApp, args);
+      command = MessageFormat.format("java -Djava.library.path={0} {1} -cp {2} {3} {4}",
+              vmJavaLibPath, classEnvironmentVariables, vmJavaClassPath, serverApp, args);
     }
     Map<String, Map<String, String>> result = cli.ssh(getVirtualMachine(), command);
     Thread.sleep(10 * 1000);
