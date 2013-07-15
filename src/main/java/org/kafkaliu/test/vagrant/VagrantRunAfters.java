@@ -1,10 +1,5 @@
 package org.kafkaliu.test.vagrant;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.MultipleFailureException;
@@ -16,8 +11,14 @@ import org.kafkaliu.test.vagrant.ruby.VagrantCli;
 import org.kafkaliu.test.vagrant.ruby.VagrantEnvironment;
 import org.kafkaliu.test.vagrant.server.VagrantServerTestRunner;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class VagrantRunAfters extends Statement {
 
+  private final VagrantEnvironment vagrantEnv;
   private Statement statement;
 
   private VagrantCli cli;
@@ -27,7 +28,8 @@ public class VagrantRunAfters extends Statement {
   public VagrantRunAfters(Statement statement, VagrantEnvironment vagrantEnv, Class<?> klass) {
     super();
     this.statement = statement;
-    this.cli = new VagrantCli(vagrantEnv);
+    this.vagrantEnv = vagrantEnv;
+    this.cli = new VagrantCli(this.vagrantEnv);
     this.klass = klass;
   }
 
@@ -49,16 +51,20 @@ public class VagrantRunAfters extends Statement {
         }
       }
 
-      VagrantConfigure annotation = klass.getAnnotation(VagrantConfigure.class);
-      if (annotation != null && annotation.needDestroyVmAfterClassTest()) {
-        cli.destroy();
+      if (vagrantEnv.allowSahara() && !vagrantEnv.isSaharaOff()) {
+        System.out.println("FATAL: vagrant sahara is in use, so VM will not be destroy automatically, please destroy manually");
       } else {
-        if (klass.getAnnotation(RunWith.class).value().isAssignableFrom(VagrantServerTestRunner.class)) {
-          try {
-            cli.ssh(getVirtualMachine(), "killall java");
-          } catch (Exception e) {
+        VagrantConfigure annotation = klass.getAnnotation(VagrantConfigure.class);
+        if (annotation != null && annotation.needDestroyVmAfterClassTest()) {
+          cli.destroy();
+        } else {
+          if (klass.getAnnotation(RunWith.class).value().isAssignableFrom(VagrantServerTestRunner.class)) {
+            try {
+              cli.ssh(getVirtualMachine(), "killall java");
+            } catch (Exception e) {
+            }
+            Thread.sleep(5 * 1000);
           }
-          Thread.sleep(5 * 1000);
         }
       }
     }

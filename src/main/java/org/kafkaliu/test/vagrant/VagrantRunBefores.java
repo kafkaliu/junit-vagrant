@@ -51,6 +51,12 @@ public class VagrantRunBefores extends Statement {
     if (needUpVm()) {
       syncedPaths();
       cli.up();
+      if (vagrantEnv.allowSahara()) {
+        if (vagrantEnv.isSaharaOff()) {
+          vagrantEnv.saharaOn();
+        }
+        vagrantEnv.saharaRollback();
+      }
     }
     if (getTestApplicationMain() != null) {
       startApplication(getTestApplicationMain());
