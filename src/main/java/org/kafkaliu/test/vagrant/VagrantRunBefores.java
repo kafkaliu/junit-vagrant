@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
 import static org.kafkaliu.test.vagrant.server.VagrantUtils.convertToGuestPaths;
@@ -34,6 +35,8 @@ public class VagrantRunBefores extends Statement {
 
   private String guestpath = "/vagrant-junit";
 
+  private Logger logger = Logger.getLogger(VagrantRunBefores.class.getName());
+
   public VagrantRunBefores(Statement statement, VagrantEnvironment vagrantEnv, Class<?> klass) {
     super();
     this.statement = statement;
@@ -48,6 +51,12 @@ public class VagrantRunBefores extends Statement {
     if (needUpVm()) {
       syncedPaths();
       cli.up();
+      if (vagrantEnv.allowSahara()) {
+        if (vagrantEnv.isSaharaOff()) {
+          vagrantEnv.saharaOn();
+        }
+        vagrantEnv.saharaRollback();
+      }
     }
     if (getTestApplicationMain() != null) {
       startApplication(getTestApplicationMain());
@@ -92,6 +101,7 @@ public class VagrantRunBefores extends Statement {
       command = MessageFormat.format("java -Djava.library.path={0} {1} -cp {2} {3} {4}",
               vmJavaLibPath, classEnvironmentVariables, vmJavaClassPath, serverApp, args);
     }
+    logger.info(String.format("Command in VM : %s", command));
     Map<String, Map<String, String>> result = cli.ssh(getVirtualMachine(), command);
     Thread.sleep(10 * 1000);
     return result;
