@@ -41,6 +41,10 @@ public class VagrantServerTestCase {
     return vagrantCli.ssh(vmName, command);
   }
 
+  public Map<String,Map<String,String>> trySsh(String vmName, String command) {
+    return vagrantCli.trySsh(vmName, command);
+  }
+
   protected String status(String vmName) {
     return ((RubyObject) vagrantMachine.getMachine(vmName).callMethod("state")).getInstanceVariable("@short_description").asJavaString();
   }
