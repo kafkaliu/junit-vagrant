@@ -37,7 +37,7 @@ public class VagrantServerTestCase {
     vagrantCli.halt(vmName);
   }
 
-  protected Map<String,Map<String,String>> ssh(String vmName, String command) {
+  public Map<String,Map<String,String>> ssh(String vmName, String command) {
     return vagrantCli.ssh(vmName, command);
   }
 

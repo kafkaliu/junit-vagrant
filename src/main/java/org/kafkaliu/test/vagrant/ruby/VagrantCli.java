@@ -1,10 +1,5 @@
 package org.kafkaliu.test.vagrant.ruby;
 
-import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jruby.RubyArray;
 import org.jruby.RubyMethod;
 import org.jruby.RubyObject;
@@ -13,6 +8,11 @@ import org.jruby.runtime.Block;
 import org.jruby.runtime.MethodBlock;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
 
 public class VagrantCli {
 
@@ -109,4 +109,7 @@ public class VagrantCli {
     return env.callCli("cli", commands);
   }
 
+  public String plugin() {
+    return cli("plugin", "list").toString();
+  }
 }

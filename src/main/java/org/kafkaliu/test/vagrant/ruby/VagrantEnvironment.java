@@ -1,23 +1,25 @@
 package org.kafkaliu.test.vagrant.ruby;
 
-import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
-import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsSymbol;
+import org.jruby.RubyObject;
+import org.jruby.embed.LocalContextScope;
+import org.jruby.embed.ScriptingContainer;
+import org.jruby.runtime.builtin.IRubyObject;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jruby.RubyObject;
-import org.jruby.embed.LocalContextScope;
-import org.jruby.embed.ScriptingContainer;
-import org.jruby.runtime.builtin.IRubyObject;
+import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
+import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsSymbol;
 
 public class VagrantEnvironment {
 
   private ScriptingContainer scriptingContainer;
 
   private RubyObject env;
+
+  private String cwd;
 
   @SuppressWarnings("unchecked")
   public VagrantEnvironment(File vagrantfile, PrintStream out, PrintStream err, String vagrantLog, String uiClass) {
@@ -42,8 +44,9 @@ public class VagrantEnvironment {
     if (uiClass == null) {
       uiClass = "Vagrant::UI::Silent";
     }
-    env = (RubyObject) scriptingContainer.runScriptlet("require 'vagrant'\n" + "\n" + "return Vagrant::Environment.new(:cwd => '" + vagrantfile.getAbsoluteFile().getParent()
-        + "', :vagrantfile_name => '" + vagrantfile.getName() + "', :ui_class => " + uiClass + ")");
+    cwd = vagrantfile.getAbsoluteFile().getParent();
+    env = (RubyObject) scriptingContainer.runScriptlet("require 'vagrant'\n" + "\n" + "return Vagrant::Environment.new(:cwd => '" + cwd
+            + "', :vagrantfile_name => '" + vagrantfile.getName() + "', :ui_class => " + uiClass + ")");
 
   }
 
@@ -61,6 +64,27 @@ public class VagrantEnvironment {
 
   public RubyObject getEnvironment() {
     return env;
+  }
+
+  public String cli(String cmd) {
+    return (String) scriptingContainer.runScriptlet(String.format("`cd %s && %s`", cwd, cmd));
+  }
+
+  public void saharaRollback() {
+    cli("vagrant sandbox rollback");
+  }
+
+  public void saharaOn() {
+    cli("vagrant sandbox on");
+  }
+
+  public boolean isSaharaOff() {
+    return !cli("vagrant sandbox status | grep off").isEmpty();
+  }
+
+  public boolean allowSahara() {
+    return "true".equals(System.getProperty("vagrant.junit.sahara")) &&
+            !cli("vagrant plugin list | grep sahara").isEmpty();
   }
 
 }
