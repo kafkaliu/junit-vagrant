@@ -1,9 +1,6 @@
 package org.kafkaliu.test.vagrant.ruby;
 
-import org.jruby.RubyArray;
-import org.jruby.RubyMethod;
-import org.jruby.RubyObject;
-import org.jruby.RubySymbol;
+import org.jruby.*;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.MethodBlock;
 import org.jruby.runtime.ThreadContext;
@@ -13,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.argsAsString;
+import static org.kafkaliu.test.vagrant.ruby.VagrantRubyHelper.newSymbol;
 
 public class VagrantCli {
 
@@ -60,7 +58,7 @@ public class VagrantCli {
   private Map<String, Map<String, String>> ssh(String command) {
     Map<String, Map<String, String>> results = new HashMap<String, Map<String, String>>();
     for (RubySymbol vmName : vagrantMachine.getMachineNames()) {
-      results.put(vmName.asJavaString(), sshOne(vmName.asJavaString(), command));
+      results.put(vmName.asJavaString(), sshOne(vmName.asJavaString(), command, false));
     }
     return results;
   }
@@ -70,24 +68,31 @@ public class VagrantCli {
       return ssh(command);
     } else {
       Map<String, Map<String, String>> result = new HashMap<String, Map<String, String>>();
-      result.put(vmName, sshOne(vmName, command));
+      result.put(vmName, sshOne(vmName, command, false));
       return result;
     }
   }
 
-  private Map<String, String> sshOne(String vmName, String command) {
+  public Map<String, Map<String, String>> trySsh(String vmName, String command) {
+    Map<String, Map<String, String>> result = new HashMap<String, Map<String, String>>();
+    result.put(vmName, sshOne(vmName, command, true));
+    return result;
+  }
+
+  private Map<String, String> sshOne(String vmName, String command, boolean ignoreException) {
     if ("running".equals(status(vmName))) {
-      return ssh(vagrantMachine.getMachine(vmName), command);
+      return ssh(vagrantMachine.getMachine(vmName), command, ignoreException);
     }
     return new HashMap<String, String>();
   }
 
   // refer to ssh_run.rb
-  private Map<String, String> ssh(RubyObject vm, String command) {
+  private Map<String, String> ssh(RubyObject vm, String command, boolean ignoreException) {
     final Map<String, String> result = new HashMap<String, String>();
     RubyMethod method = (RubyMethod) (((RubyObject) vm.callMethod("communicate")).method(argsAsString(env, "execute")));
 
-    ThreadContext tc = env.getEnvironment().getRuntime().getCurrentContext();
+    Ruby runtime = env.getEnvironment().getRuntime();
+    ThreadContext tc = runtime.getCurrentContext();
     Block methodBlock = MethodBlock.createMethodBlock(tc, method, tc.getCurrentScope(), new MethodBlock(method, tc.getCurrentStaticScope()) {
 
       @Override
@@ -100,7 +105,9 @@ public class VagrantCli {
       }
     });
 
-    method.call(tc, argsAsString(env, command), methodBlock);
+    RubyHash opts = new RubyHash(runtime);
+    opts.put(newSymbol(env, "error_check"), !ignoreException);
+    method.call(tc, argsAsString(env, command), opts, methodBlock);
 
     return result;
   }
