@@ -19,6 +19,10 @@
 			<id>snapshots</id>
 			<url>http://10.186.18.11:8081/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
+		<repository>
+			<id>releases</id>
+			<url>http://10.186.18.11:8081/nexus/content/repositories/releases</url>
+		</repository>
 	</distributionManagement>
 	
 	<dependencies>
@@ -41,6 +45,17 @@
 	</dependencies>
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>com.atlassian.maven.plugins</groupId>
+                <artifactId>maven-jgitflow-plugin</artifactId>
+                <configuration>
+                    <!-- see goals wiki page for configuration options -->
+                    <noDeploy>false</noDeploy>
+                    <pushHotfixes>true</pushHotfixes>
+                    <pushReleases>true</pushReleases>
+                    <allowSnapshots>false</allowSnapshots>
+                </configuration>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
