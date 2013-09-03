@@ -3,7 +3,7 @@
 
 	<groupId>org.kafkaliu.test</groupId>
 	<artifactId>junit-vagrant</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>junit-vagrant</name>
